@@ -26,6 +26,8 @@ const SignUpPage = () => {
       });
 
       if (response.ok) {
+        const data=await response.json();
+        console.log(data.username);
         navigate('/signin');
       } else {
         const data = await response.json();

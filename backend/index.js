@@ -43,6 +43,7 @@ app.post('/signup', async (req, res) => {
     // Create new user
     const user = new User({ username, email, password: hashedPassword });
     await user.save();
+    console.log(user.username);
 
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
@@ -69,33 +70,11 @@ app.post('/signin', async (req, res) => {
 
     // Generate JWT
     const token = jwt.sign({ userId: user._id },process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
-    res.status(200).json({ token });
+    res.status(200).json({ token, username: user.username });
   } catch (error) {
     res.status(500).json({ message: 'Error signing in', error });
   }
 });
-
-app.post('/weather/dummy', async (req, res) => {
-  try {
-    const dummyData = [
-      /*{ temperature: 25, humidity: 60, soilMoisture: 45, timestamp: new Date() },
-      { temperature: 28, humidity: 55, soilMoisture: 50, timestamp: new Date() - 3600 * 1000 },
-      { temperature: 30, humidity: 65, soilMoisture: 55, timestamp: new Date() - 2 * 3600 * 1000 },
-      { temperature: 22, humidity: 70, soilMoisture: 48, timestamp: new Date() - 3 * 3600 * 1000 },
-      { temperature: 24, humidity: 50, soilMoisture: 40, timestamp: new Date() - 4 * 3600 * 1000 },
-      { temperature: 50, humidity: 30, soilMoisture: 45, timestamp: new Date() - 5 * 3600 * 1000 },
-       */
-    ];
-
-    // Save all dummy data to the database
-    await Weather.insertMany(dummyData);
-
-    res.status(201).json({ message: 'Dummy weather data saved successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error saving dummy weather data', error });
-  }
-});
-
 
 app.get('/weather', async (req, res) => {
   try {
@@ -155,20 +134,27 @@ app.post('/reset-password', async (req, res) => {
 
 //POST requuest for sensor data...
 app.post('/api/sensor-data', async (req, res) => {
-  const { temperature, humidity } = req.body;
+  const { temperature, humidity, soilMoisture } = req.body;
 
-  if (!temperature || !humidity) {
-    return res.status(400).json({ message: 'Temperature and humidity are required' });
+  if (
+    temperature === undefined ||
+    humidity === undefined ||
+    soilMoisture === undefined
+  ) {
+    return res.status(400).json({
+      message: 'Temperature, humidity, and soilMoisture are required',
+    });
   }
 
   try {
-    const newData = new SensorData({ temperature, humidity });
+    const newData = new Weather({ temperature, humidity, soilMoisture });
     await newData.save();
     res.status(201).json({ message: 'Data saved successfully', data: newData });
   } catch (error) {
     res.status(500).json({ message: 'Error saving data', error });
   }
 });
+
 
 // running the port....
 const PORT = process.env.PORT || 5000;

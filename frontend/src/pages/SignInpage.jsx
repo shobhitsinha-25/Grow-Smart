@@ -26,7 +26,9 @@ const SignInPage = () => {
 
       if (response.ok) {
         const data = await response.json();
+        console.log(data);  
         localStorage.setItem('token', data.token);
+        localStorage.setItem('username', data.username);  
         navigate('/dashboard');
       } else {
         const data = await response.json();
