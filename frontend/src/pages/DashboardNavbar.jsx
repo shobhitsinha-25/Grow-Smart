@@ -50,20 +50,7 @@ const DashboardNavbar = ({ isDark, toggleDarkMode }) => {
           >
             About
           </Link>
-          <Link
-            to="/signin"
-            className="hover:text-green-500 transition duration-200 text-sm"
-          >
-            Sign In
-          </Link>
-          <Link
-            to="/signup"
-            className="hover:text-green-500 transition duration-200 text-sm"
-          >
-            Sign Up
-          </Link>
 
-          
           <button
             onClick={handleLogout}
             className="hover:text-red-400 transition duration-200 text-sm"
