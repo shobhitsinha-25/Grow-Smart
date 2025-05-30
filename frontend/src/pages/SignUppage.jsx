@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import ReactTypingEffect from 'react-typing-effect';
 import Navbar from './Navbar';
 import orbital from "../images/orbital.png"
-import AIHelper from './AiHelper';
+
 
 const SignUpPage = () => {
   const [formData, setFormData] = useState({ username: '', email: '', password: '' });
@@ -121,7 +121,6 @@ const SignUpPage = () => {
 
     
   </div>
-  <AIHelper />
 </div>
 
 

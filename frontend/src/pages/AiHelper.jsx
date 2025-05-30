@@ -1,77 +1,98 @@
-import React, { useState } from 'react';
+// AiHelper.jsx
+import React, { useState } from "react";
+import { GoogleGenAI } from "@google/genai";
 
-const AIHelper = () => {
-  const [query, setQuery] = useState('');
-  const [response, setResponse] = useState('');
+// Initialize GoogleGenAI outside the component to avoid re-initializing on every render
+const ai = new GoogleGenAI({
+  apiKey: import.meta.env.VITE_GEMINI_API_KEY,
+});
+
+const GeminiAssistant = ({ onClose }) => {
+  const [userInput, setUserInput] = useState("");
+  const [responseText, setResponseText] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleQuery = async () => {
-    if (!query.trim()) return;
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                role: 'user',
-                parts: [{ text: query }],
-              },
-            ],
-          }),
-        }
-      );
+  const askQuestion = async () => {
+    // 1. Validate user input
+    if (!userInput.trim()) {
+      setResponseText("Please enter a question.");
+      return;
+    }
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        console.error('Gemini API Error:', errorData);
-        setResponse(`Error: ${errorData.error?.message || res.statusText}`);
-      } else {
-        const data = await res.json();
-        const summary =
-          data?.candidates?.[0]?.content?.parts?.[0]?.text || 'No response found.';
-        setResponse(summary);
+    setLoading(true);
+    setResponseText("");
+
+    try {
+      // 2. Defensive check for API key presence
+      if (!import.meta.env.VITE_GEMINI_API_KEY) {
+        setResponseText(" Error: API Key (VITE_GEMINI_API_KEY) is not set. Please check your .env file.");
+        setLoading(false);
+        return;
       }
-    } catch (err) {
-      console.error('Fetch Error:', err);
-      setResponse('Failed to fetch response.');
+
+      const result = await ai.models.generateContent({
+        model: "gemini-1.5-flash", // Or "gemini-2.0-flash" if you have access and prefer it
+        contents: [{ role: "user", parts: [{ text: userInput }] }],
+      });
+
+      if (!result || typeof result.text === 'undefined') {
+        console.error("Gemini API: The 'generateContent' call returned an empty or malformed text response.", result);
+        setResponseText(" Error: Failed to get text response from the Gemini API. Response format unexpected.");
+        return;
+      }
+
+      const geminiResponseText = result.text; // Access 'text' as a property, not a function
+      setResponseText(geminiResponseText);
+
+    } catch (error) {
+      console.error("Gemini API error:", error);
+      if (error.message.includes("API key not valid")) {
+         setResponseText(" Error: Your Gemini API key is invalid or not correctly configured.");
+      } else if (error.message.includes("Quota exceeded")) {
+         setResponseText(" Error: API usage quota exceeded. Please check your billing or try again later.");
+      } else if (error.message.includes("400") || error.message.includes("bad request")) {
+         setResponseText(" Error: Invalid request to Gemini AI. Check your input or model name.");
+      } else {
+         setResponseText(" An unexpected error occurred: " + error.message);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white p-3 rounded-lg shadow-md w-full max-w-lg z-50 border border-gray-200">
-      <h2 className="text-sm font-semibold mb-2 text-gray-800 text-center">Ask Ai</h2>
-      <div className="flex items-center gap-2">
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+      <div className="bg-white rounded-lg p-6 w-[400px] relative text-black">
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-2 text-red-500 text-xl"
+        >
+          ✖️
+        </button>
+        <h2 className="text-lg font-bold mb-2">Ask Cultiv AI</h2>
         <input
           type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Ask something..."
-          className="flex-grow px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 text-sm"
+          className="w-full border p-2 mb-2 rounded"
+          value={userInput}
+          onChange={(e) => setUserInput(e.target.value)}
+          placeholder="Ask your question..."
         />
         <button
-          onClick={handleQuery}
-          disabled={loading}
-          className="bg-green-500 text-white px-4 py-1.5 rounded-md text-sm hover:bg-green-600 transition duration-200"
+          onClick={askQuestion}
+          disabled={loading || !userInput.trim()}
+          className="bg-blue-600 text-white px-4 py-2 rounded"
         >
-          {loading ? 'Thinking...' : 'Ask'}
+          {loading ? "Thinking..." : "Ask"}
         </button>
+        {responseText && (
+          // Apply max-height and overflow-y-auto here
+          <div className="mt-4 p-3 bg-gray-100 rounded text-sm max-h-40 overflow-y-auto">
+            {responseText}
+          </div>
+        )}
       </div>
-
-      {response && (
-        <div className="mt-2 p-2 bg-gray-100 rounded-md text-gray-800 text-sm max-h-20 overflow-y-auto">
-          <strong>AI:</strong> {response}
-        </div>
-      )}
     </div>
   );
 };
 
-export default AIHelper;
+export default GeminiAssistant;
