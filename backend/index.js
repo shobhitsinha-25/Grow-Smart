@@ -7,6 +7,8 @@ import dotenv from 'dotenv';
 import User from './Model/usermodel.js';
 import Weather from './Model/datamodel.js';
 import nodemailer from 'nodemailer';
+import http from 'http';
+import { Server } from 'socket.io';
 
 // Initialize environment variables
 dotenv.config();
@@ -15,6 +17,26 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Create HTTP server wrapping Express
+const server = http.createServer(app);
+
+// Attach Socket.IO to HTTP server
+const io = new Server(server, {
+  cors: {
+    origin: '*', // Replace with your frontend URL in production
+    methods: ['GET', 'POST'],
+  },
+});
+
+// Handle socket connections
+io.on('connection', (socket) => {
+  console.log('A user connected:', socket.id);
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
 
 const mongoURI = process.env.MONGO_URI;
 
@@ -77,7 +99,7 @@ app.post('/signin', async (req, res) => {
 });
 
 app.post('/api/sensor-data', async (req, res) => {
-  const { temperature, humidity, soilMoisture,rainDetected  } = req.body;
+  const { temperature, humidity, soilMoisture, rainDetected } = req.body;
 
   if (
     temperature === undefined ||
@@ -98,11 +120,16 @@ app.post('/api/sensor-data', async (req, res) => {
       rainDetected: rainDetected ?? false
     });
     await newData.save();
+
+    // Emit new data event to all connected clients
+    io.emit('newSensorData', newData);
+
     res.status(201).json({ message: 'Data saved successfully', data: newData });
   } catch (error) {
     res.status(500).json({ message: 'Error saving data', error });
   }
 });
+
 
 
 app.get('/weather', async (req, res) => {
@@ -251,6 +278,6 @@ app.post('/api/sensor-data', async (req, res) => {
 
 // running the port....
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -1,29 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { io } from "socket.io-client";  // Import socket.io-client
 import DashboardNavbar from "./DashboardNavbar";
 import {
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  BarChart,
-  Bar,
+  PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid,
+  Tooltip, Legend, BarChart, Bar,
 } from "recharts";
 import RainStatus from "./RainStatus";
 import LottieLoader from "./Loader";
 
 const GaugeChart = ({ value, min = 0, max = 100, label }) => {
-  const gaugeData = [
-    { value: value - min },
-    { value: max - value },
-  ];
-
+  const gaugeData = [{ value: value - min }, { value: max - value }];
   const COLORS = ["orange", "red"];
 
   return (
@@ -63,11 +50,9 @@ const GaugeChart = ({ value, min = 0, max = 100, label }) => {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [weatherData, setWeatherData] = useState(null);
+  const [weatherData, setWeatherData] = useState([]);
   const [isDark, setIsDark] = useState(true);
   const [showLoader, setShowLoader] = useState(true);
-
-  const toggleDarkMode = () => setIsDark(!isDark);
   const apibaseurl = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
@@ -75,11 +60,11 @@ const Dashboard = () => {
     if (!token) {
       navigate("/signin");
     }
-
     const timeout = setTimeout(() => setShowLoader(false), 5000);
     return () => clearTimeout(timeout);
   }, [navigate]);
 
+  // Fetch initial weather data on mount
   useEffect(() => {
     const fetchWeatherData = async () => {
       try {
@@ -94,12 +79,38 @@ const Dashboard = () => {
         console.error("Error fetching weather data:", error);
       }
     };
-
     fetchWeatherData();
   }, [apibaseurl]);
 
-  const historicalData = weatherData ? weatherData.slice(0, 7).reverse() : [];
-  const latestData = weatherData ? weatherData[0] : null;
+  // Socket.io real-time updates
+  useEffect(() => {
+    const socket = io(apibaseurl); // Connect to your backend Socket.IO server
+
+    socket.on("connect", () => {
+      console.log("Connected to socket server");
+    });
+
+    // Listen for new sensor data event from backend
+    socket.on("newSensorData", (newData) => {
+      console.log("New sensor data received:", newData);
+      // Add new data to the front of the weatherData array (assuming latest first)
+      setWeatherData(prevData => [newData, ...prevData]);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Disconnected from socket server");
+    });
+
+    // Cleanup on unmount
+    return () => {
+      socket.disconnect();
+    };
+  }, [apibaseurl]);
+
+  const historicalData = weatherData.slice(0, 7).reverse();
+  const latestData = weatherData[0] || null;
+
+  const toggleDarkMode = () => setIsDark(!isDark);
 
   return (
     <div className={isDark ? "dark" : ""}>
