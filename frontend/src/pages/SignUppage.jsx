@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import ReactTypingEffect from 'react-typing-effect';
 import Navbar from './Navbar';
 import orbital from "../images/orbital.png"
+import Lottie from 'lottie-react';
+import agricultureAnimation from '../agriculture.json';
 
 
 const SignUpPage = () => {
@@ -96,30 +98,60 @@ const SignUpPage = () => {
             </form>
           </div>
         </div>
-<div className="right w-[60%] h-screen bg-black relative flex items-center justify-center px-8">
-  
+    <div className="right w-[60%] h-screen bg-black relative flex flex-col px-8">
+  {/* Background Orbital Image */}
   <img
     src={orbital}
     alt="Orbital"
-  className="absolute inset-0 w-full h-full object-cover opacity-50 animate-signuprotateOrbit"
+    className="absolute inset-0 w-full h-full object-cover opacity-50 animate-signuprotateOrbit"
   />
-  
-  <div className="relative text-center text-white z-10">
-    <h1 className="text-[3rem] font-rye text-green-300 font-jersey">
-  <ReactTypingEffect
-    text={["Grow Smart"]} 
-    speed={105} 
-    eraseDelay={900} 
-    cursor="_" 
-  />
-</h1>
-    <div className="bg-transparent  text-white p-6 rounded-lg w-full max-w-3xl mx-auto  text-center">
-  <p className="text-sm leading-relaxed">
-    Grow Smart is an innovative project aimed at improving farming efficiency and sustainability through IoT and automation. This system integrates sensors to monitor critical environmental parameters like soil moisture, temperature, and humidity. Using real-time data, it automates irrigation, ensuring optimal water usage and preventing crop damage due to over- or under-watering. A user-friendly web or mobile interface allows farmers to monitor conditions remotely and receive actionable insights. By combining hardware components such as microcontrollers, sensors, and actuators with software technologies and cloud platforms, the Smart Agriculture System addresses key agricultural challenges. It offers a scalable and cost-effective solution to promote sustainable farming practices, conserve resources, and increase crop productivity. This project bridges technology and agriculture, contributing to a smarter and more efficient farming ecosystem.
-  </p>
+
+  {/* Top Section: Heading + Description */}
+<div className=" relative z-10 text-center text-white flex-grow flex flex-col items-center justify-center">
+  <h1 className=" mt-[60px] text-[3rem] font-rye text-green-300 font-jersey">
+    <ReactTypingEffect
+      text={["Grow Smart"]}
+      speed={105}
+      eraseDelay={900}
+      cursor="_"
+    />
+  </h1>
+  <div className="bg-transparent text-white p-3 rounded-lg w-full max-w-3xl text-center">
+    <p className="text-sm leading-relaxed">
+      Grow Smart is an innovative project aimed at improving farming efficiency and sustainability through IoT and automation. This system integrates sensors to monitor critical environmental parameters like soil moisture, temperature, and humidity. Using real-time data, it automates irrigation, ensuring optimal water usage and preventing crop damage due to over- or under-watering. A user-friendly web or mobile interface allows farmers to monitor conditions remotely and receive actionable insights. By combining hardware components such as microcontrollers, sensors, and actuators with software technologies and cloud platforms, the Smart Agriculture System addresses key agricultural challenges. It offers a scalable and cost-effective solution to promote sustainable farming practices, conserve resources, and increase crop productivity. This project bridges technology and agriculture, contributing to a smarter and more efficient farming ecosystem.
+    </p>
+  </div>
 </div>
 
-    
+  {/* Bottom Section: Lottie Animation */}
+  <div className="relative z-10 flex justify-start items-end h-[120px] ">
+  <div className="w-[80px] h-[80px]">
+    <Lottie animationData={agricultureAnimation} loop={true} />
+    </div>
+    <div className="w-[80px] h-[80px]">
+      <Lottie animationData={agricultureAnimation} loop={true} />
+    </div>
+    <div className="w-[80px] h-[80px]">
+      <Lottie animationData={agricultureAnimation} loop={true} />
+    </div>
+    <div className="w-[80px] h-[80px]">
+      <Lottie animationData={agricultureAnimation} loop={true} />
+    </div>
+    <div className="w-[80px] h-[80px]">
+      <Lottie animationData={agricultureAnimation} loop={true} />
+    </div>
+    <div className="w-[80px] h-[80px]">
+      <Lottie animationData={agricultureAnimation} loop={true} />
+    </div>
+    <div className="w-[80px] h-[80px]">
+      <Lottie animationData={agricultureAnimation} loop={true} />
+    </div>
+    <div className="w-[80px] h-[80px]">
+      <Lottie animationData={agricultureAnimation} loop={true} />
+    </div>
+    <div className="w-[80px] h-[80px]">
+      <Lottie animationData={agricultureAnimation} loop={true} />
+    </div>
   </div>
 </div>
 

@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import orbital from "../images/orbital.png";
 import ReactTypingEffect from 'react-typing-effect';
+import Lottie from 'lottie-react';
+import agricultureAnimation from "../agriculture.json"
 
 const SignInPage = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -88,6 +90,9 @@ const SignInPage = () => {
             </form>
           </div>
         </div>
+
+                    {/*Right div*/}
+
         <div className="bg-black right w-[60%] h-screen overflow-hidden relative">
   {/* Orbital Image */}
   <img
@@ -107,9 +112,21 @@ const SignInPage = () => {
       />
     </h1>
   </div>
+    {/* Bottom Left Lottie Animation */}
+   
+    <div className="absolute bottom-4 left-4 flex gap-2 z-10">
+  {Array(9).fill(0).map((_, i) => (
+    <div key={i} className="w-[75px] h-[80px]">
+      <Lottie animationData={agricultureAnimation} loop={true} />
+    </div>
+  ))}
+</div>
+  </div>
+
+
 </div>
 
-      </div>
+      
     </>
   );
 };

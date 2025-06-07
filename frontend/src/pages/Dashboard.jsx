@@ -1,15 +1,30 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardNavbar from "./DashboardNavbar";
-import { PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, BarChart, Bar } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  BarChart,
+  Bar,
+} from "recharts";
+import RainStatus from "./RainStatus";
+import LottieLoader from "./Loader";
 
 const GaugeChart = ({ value, min = 0, max = 100, label }) => {
   const gaugeData = [
-    { value: value - min }, // Filled part
-    { value: max - value }, // Empty part
+    { value: value - min },
+    { value: max - value },
   ];
 
-  const COLORS = ["orange", "red"]; // Colors for filled and empty segments
+  const COLORS = ["orange", "red"];
 
   return (
     <div style={{ textAlign: "center", margin: "20px 10px" }}>
@@ -28,9 +43,20 @@ const GaugeChart = ({ value, min = 0, max = 100, label }) => {
           ))}
         </Pie>
       </PieChart>
-      <p style={{ marginTop: "-80px", fontSize: "20px", fontWeight: "bold" }}>
-        {value} {label}
-      </p>
+      <div style={{ marginTop: "-100px", textAlign: "center" }}>
+        <p style={{ fontSize: "20px", fontWeight: "bold", margin: 0 }}>
+          {value} {label.includes("°C") ? "°C" : label.includes("%") ? "%" : ""}
+        </p>
+        <p style={{ fontSize: "18px", fontWeight: "bold", margin: 0 }}>
+          {label.includes("Temperature")
+            ? "Temperature"
+            : label.includes("Humidity")
+            ? "Humidity"
+            : label.includes("Soil Moisture")
+            ? "Soil Moisture"
+            : ""}
+        </p>
+      </div>
     </div>
   );
 };
@@ -38,15 +64,11 @@ const GaugeChart = ({ value, min = 0, max = 100, label }) => {
 const Dashboard = () => {
   const navigate = useNavigate();
   const [weatherData, setWeatherData] = useState(null);
-  const [isDark, setIsDark] = useState(true); 
+  const [isDark, setIsDark] = useState(true);
+  const [showLoader, setShowLoader] = useState(true);
 
   const toggleDarkMode = () => setIsDark(!isDark);
-
   const apibaseurl = import.meta.env.VITE_API_BASE_URL;
-
-  const [externalTemp, setExternalTemp] = useState(null);
-
-
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -54,6 +76,11 @@ const Dashboard = () => {
       navigate("/signin");
     }
 
+    const timeout = setTimeout(() => setShowLoader(false), 5000);
+    return () => clearTimeout(timeout);
+  }, [navigate]);
+
+  useEffect(() => {
     const fetchWeatherData = async () => {
       try {
         const response = await fetch(`${apibaseurl}/weather`);
@@ -69,25 +96,25 @@ const Dashboard = () => {
     };
 
     fetchWeatherData();
-  }, [navigate]);
+  }, [apibaseurl]);
 
-  const historicalData = weatherData || [];
-  const latestData = weatherData ? weatherData[weatherData.length - 1] : null;
+  const historicalData = weatherData ? weatherData.slice(0, 7).reverse() : [];
+  const latestData = weatherData ? weatherData[0] : null;
 
   return (
     <div className={isDark ? "dark" : ""}>
-      {/* Pass state and toggle to Navbar */}
       <DashboardNavbar isDark={isDark} toggleDarkMode={toggleDarkMode} />
-     
 
       <div className="mt-[100px] bg-white text-black dark:bg-black dark:text-white transition-colors duration-300">
         {latestData ? (
           <div className="p-4">
-            <h2 className="text-xl font-bold mb-4 mt-[3px]">Weather Data</h2>
-            <div className="flex justify-center mt-[10px]">
-              <GaugeChart value={latestData.temperature} min={0} max={50} label="°C" />
-              <GaugeChart value={latestData.humidity} min={0} max={100} label="" />
-              <GaugeChart value={latestData.soilMoisture} min={0} max={100} label="" />
+            <h2 className="text-[30px] font-bold mt-[2px] text-center">
+              Real-Time Weather & Soil Stats
+            </h2>
+            <div className="flex justify-center">
+              <GaugeChart value={latestData.temperature} min={0} max={50} label="°C (Temperature)" />
+              <GaugeChart value={latestData.humidity} min={0} max={100} label="(% Humidity)" />
+              <GaugeChart value={latestData.soilMoisture} min={0} max={100} label="(% Soil Moisture)" />
             </div>
 
             <div className="flex justify-between">
@@ -118,10 +145,11 @@ const Dashboard = () => {
                 </BarChart>
               </div>
             </div>
+            <RainStatus rainDetected={latestData?.rainDetected} />
           </div>
-        ) : (
-          <p>Loading...</p>
-        )}
+        ) : showLoader ? (
+          <LottieLoader />
+        ) : null}
       </div>
 
       <footer className="bg-black text-white text-center py-4">

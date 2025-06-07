@@ -5,12 +5,14 @@ import orbital from "../images/orbital.png";
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const apibaseurl = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
 
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     try {
       const response = await fetch(`${apibaseurl}/forgot-password`, {
@@ -19,15 +21,21 @@ const ForgotPassword = () => {
         body: JSON.stringify({ email }),
       });
 
+      const data = await response.json();
+      setLoading(false);
+
       if (response.ok) {
-        const data = await response.json();
-        navigate('/verify', { state: { email, verificationCode: data.verificationCode } });
+        // Redirect to Reset Password with email and verificationCode
+        navigate('/reset-password', {
+          state: { email, verificationCode: data.verificationCode },
+        });
       } else {
-        const data = await response.json();
-        setError(data.message);
+        setError(data.message || 'Something went wrong.');
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      console.error(err);
+      setLoading(false);
+      setError('An error occurred. Please try again later.');
     }
   };
 
@@ -43,7 +51,7 @@ const ForgotPassword = () => {
       </div>
 
       {/* Form */}
-      <div className="absolute z-10 shadow-md rounded px-8 py-6 w-full max-w-sm bg-white text-black ">
+      <div className="absolute z-10 shadow-md rounded px-8 py-6 w-full max-w-sm bg-white text-black">
         <h1 className="text-2xl font-bold text-center mb-6">Forgot Password</h1>
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
         <form onSubmit={handleForgotPassword}>
@@ -59,8 +67,9 @@ const ForgotPassword = () => {
           <button
             type="submit"
             className="w-full bg-green-500 text-white py-2 px-4 rounded-md mt-4 hover:bg-green-600 transition duration-200"
+            disabled={loading}
           >
-            Generate Verification Code
+            {loading ? 'Sending...' : 'Generate Verification Code'}
           </button>
         </form>
       </div>

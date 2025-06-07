@@ -4,6 +4,7 @@ const weatherSchema = new mongoose.Schema({
   temperature: { type: Number, required: true },
   humidity: { type: Number, required: true },
   soilMoisture: { type: Number, required: true },
+  rainDetected: { type: Boolean, default: false },
   timestamp: { type: Date, default: Date.now },
 });
 
