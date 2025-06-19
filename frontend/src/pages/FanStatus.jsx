@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from "react";
 import Lottie from "lottie-react";
 import fanOn from "../FanOn.json";
 import fanOffImg from "../images/FanOff.png";
-import fanSound from "../Sounds/Fanonsound.mp3"; 
+import fanSound from "../Sounds/FanonSound.mp3"; 
 
 const FanStatus = ({ isOn }) => {
   const audioRef = useRef(null);
