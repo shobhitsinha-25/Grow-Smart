@@ -10,7 +10,7 @@ import RainStatus from "./RainStatus";
 import LottieLoader from "./Loader";
 import FanStatus from "./FanStatus";
 import PumpStatus from "./PumpStatus";
-import RainAudio from "./WeatherSound";
+
 
 const GaugeChart = ({ value, min = 0, max = 100, label }) => {
   const gaugeData = [{ value: value - min }, { value: max - value }];
