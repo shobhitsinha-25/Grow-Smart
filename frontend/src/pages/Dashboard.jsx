@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { io } from "socket.io-client";  // Import socket.io-client
+import { io } from "socket.io-client";  
 import DashboardNavbar from "./DashboardNavbar";
 import {
   PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid,
@@ -8,6 +8,9 @@ import {
 } from "recharts";
 import RainStatus from "./RainStatus";
 import LottieLoader from "./Loader";
+import FanStatus from "./FanStatus";
+import PumpStatus from "./PumpStatus";
+import RainAudio from "./WeatherSound";
 
 const GaugeChart = ({ value, min = 0, max = 100, label }) => {
   const gaugeData = [{ value: value - min }, { value: max - value }];
@@ -156,7 +159,19 @@ const Dashboard = () => {
                 </BarChart>
               </div>
             </div>
-            <RainStatus rainDetected={latestData?.rainDetected} />
+            <div className="flex justify-around items-start mt-8 flex-wrap gap-6">
+  <div className="flex-1 min-w-[200px] max-w-[300px]">
+    <RainStatus rainDetected={latestData?.rainDetected} />
+  </div>
+  <div className="flex-1 min-w-[200px] max-w-[300px]">
+    <PumpStatus isOn={latestData?.pumpStatus} />
+  </div>
+  <div className="flex-1 min-w-[200px] max-w-[300px]">
+    <FanStatus isOn={latestData?.fanStatus} />
+  </div>
+  
+</div>
+
           </div>
         ) : showLoader ? (
           <LottieLoader />

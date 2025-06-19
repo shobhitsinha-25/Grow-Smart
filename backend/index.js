@@ -24,7 +24,7 @@ const server = http.createServer(app);
 // Attach Socket.IO to HTTP server
 const io = new Server(server, {
   cors: {
-    origin: '*', // Replace with your frontend URL in production
+    origin: '*', 
     methods: ['GET', 'POST'],
   },
 });
@@ -98,14 +98,18 @@ app.post('/signin', async (req, res) => {
   }
 });
 
+// Sensor api...
+
 app.post('/api/sensor-data', async (req, res) => {
-  const { temperature, humidity, soilMoisture, rainDetected } = req.body;
+  const { temperature, humidity, soilMoisture, rainDetected, pumpStatus, fanStatus } = req.body;
 
   if (
     temperature === undefined ||
     humidity === undefined ||
     soilMoisture === undefined ||
-    rainDetected === undefined
+    rainDetected === undefined ||
+    pumpStatus === undefined || 
+    fanStatus === undefined
   ) {
     return res.status(400).json({
       message: 'Temperature, humidity, and soilMoisture are required',
@@ -117,7 +121,9 @@ app.post('/api/sensor-data', async (req, res) => {
       temperature,
       humidity,
       soilMoisture,
-      rainDetected: rainDetected ?? false
+      rainDetected: rainDetected ?? false,
+      pumpStatus,
+      fanStatus,
     });
     await newData.save();
 
@@ -130,8 +136,7 @@ app.post('/api/sensor-data', async (req, res) => {
   }
 });
 
-
-
+// Getting data....
 app.get('/weather', async (req, res) => {
   try {
     const weatherData = await Weather.find().sort({ timestamp: -1 }); // Sort by most recent
@@ -252,28 +257,7 @@ app.post('/reset-password', async (req, res) => {
   }
 });
 
-//POST requuest for sensor data...
-app.post('/api/sensor-data', async (req, res) => {
-  const { temperature, humidity, soilMoisture } = req.body;
 
-  if (
-    temperature === undefined ||
-    humidity === undefined ||
-    soilMoisture === undefined
-  ) {
-    return res.status(400).json({
-      message: 'Temperature, humidity, and soilMoisture are required',
-    });
-  }
-
-  try {
-    const newData = new Weather({ temperature, humidity, soilMoisture });
-    await newData.save();
-    res.status(201).json({ message: 'Data saved successfully', data: newData });
-  } catch (error) {
-    res.status(500).json({ message: 'Error saving data', error });
-  }
-});
 
 
 // running the port....
